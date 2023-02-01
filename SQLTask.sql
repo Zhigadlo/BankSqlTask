@@ -1,3 +1,5 @@
+--task1(db structure creation)
+------------------------------------------------
 create database BankSystem;
 go
 use BankSystem;
@@ -65,7 +67,10 @@ create table CityBankBranches
 );
 
 go
+------------------------------------------------
 
+--task9
+------------------------------------------------
 create trigger Accounts_Update
 on Accounts 
 for update
@@ -123,7 +128,10 @@ begin
 	close cur
 end
 go
+------------------------------------------------
 
+--task1(tables filling)
+------------------------------------------------
 --many tables filling
 insert SocialStates values ('student'), ('pensioner'), ('disabled'), ('veteran'), ('worker')
 insert Cities values ('Minsk'), ('Gomel'), ('Mozyr'), ('Zhitomir'), ('Brest')
@@ -153,3 +161,15 @@ begin
 									(select top 1 Id from BankBranches order by newid()));
 	set @i = @i + 1;
 end
+
+go
+------------------------------------------------
+
+--task2
+------------------------------------------------
+select distinct b.Name from BankBranches as bb 
+join Banks as b on b.Id = bb.BankId
+join CityBankBranches as cbb on bb.Id = cbb.BankBranchId
+join Cities as c on c.Id = cbb.CityId
+where c.Name = 'Gomel'
+------------------------------------------------
