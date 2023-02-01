@@ -173,3 +173,12 @@ join CityBankBranches as cbb on bb.Id = cbb.BankBranchId
 join Cities as c on c.Id = cbb.CityId
 where c.Name = 'Gomel'
 ------------------------------------------------
+
+--task3
+------------------------------------------------
+select clt.FullName as 'Client name', crd.Balance as 'Balance', bnk.Name as 'Bank' 
+from Cards as crd
+join Accounts as acc on acc.Id = crd.AccountId
+join Banks as bnk on bnk.Id = acc.BankId
+join Clients as clt on clt.Id = acc.ClientId
+------------------------------------------------
