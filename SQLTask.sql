@@ -41,7 +41,7 @@ create table Accounts
 create table Cards
 (
 	Id int primary key identity(1, 1),
-	Number varchar(16) not null,
+	Number varchar(16) not null unique,
 	AccountId int not null,
 	Balance money default 0,
 	constraint FK_Cards_To_Accounts foreign key(AccountId) references Accounts(Id) on delete cascade
@@ -91,32 +91,65 @@ end
 go
 
 create trigger Cards_Insert_Update
-on Accounts 
+on Cards 
 for insert, update
 as
 begin 
-	
 	declare @AccountBalance money, @CardsAccountBalance money, @AccountId int
 	
+	declare cur cursor for  
+	select AccountId from inserted
+
 	open cur
-	fetch next into @AccountId
+	fetch next from cur 
+	into @AccountId
+	
 	while @@fetch_status = 0
 	begin
 		select @AccountBalance = a.Balance, @CardsAccountBalance = Sum(c.Balance)
 		from Accounts as a
-		join Accounts as c on inserted.Account = c.Id
-		group by inserted.Balance
+		join Cards as c on c.AccountId = a.Id
+		where a.Id = @AccountId
+		group by a.Balance
 
 		if @AccountBalance < @CardsAccountBalance
 		begin
+			print 'You have not enough money';
 			rollback transaction
-			print 'You have not enough money on the card with id=' + convert(nvarchar, inserted.Id);
 		end
 
 		fetch next from cur into @AccountId
 	end
+	close cur
 end
 go
 
+--many tables filling
+insert SocialStates values ('student'), ('pensioner'), ('disabled'), ('veteran'), ('worker')
+insert Cities values ('Minsk'), ('Gomel'), ('Mozyr'), ('Zhitomir'), ('Brest')
+insert Banks values ('Alfa-bank'), ('Belarusbank'), ('Belinvestbank'), ('Razvodilovobank'), ('MTB-bank')
 
+declare @i int, @tableItemsCount int
 
+set @i = 1;
+set @tableItemsCount = 5;
+
+--one to many tables filling
+while @i <= @tableItemsCount
+begin
+	insert Clients values ('Fullname' + convert(varchar, @i), (select top 1 Id from SocialStates order by newid()))
+	insert Accounts values ((select top 1 Id from Clients order by newid()), (select top 1 Id from Banks order by newid()), @i * 1000)
+	insert Cards values ('number' + convert(varchar, @i), @i, @i*500)
+	insert BankBranches values('branch' + convert(varchar, @i), (select top 1 Id from Banks order by newid()))
+	set @i = @i + 1
+end
+
+set @i = 1
+
+--many to many table filling
+while @i <= @tableItemsCount
+begin 
+	insert CityBankBranches values ((select top 1 Id from Cities order by newid()),
+									(select top 1 Id from BankBranches order by newid()));
+	set @i = @i + 1;
+end
