@@ -192,3 +192,13 @@ join Cards as crd on crd.AccountId = acc.Id
 group by acc.Balance, clt.FullName
 having Sum(crd.Balance) < acc.Balance
 ------------------------------------------------
+
+--task 5(group by realisation)
+------------------------------------------------
+select socSt.Name as 'Social state', Count(crd.Id) as 'Cards count'
+from Accounts as acc 
+join Clients as clt on clt.Id = acc.ClientId
+join Cards as crd on crd.AccountId = acc.Id
+right join SocialStates as socSt on clt.SocialStateId = socSt.Id
+group by socSt.Name
+------------------------------------------------
