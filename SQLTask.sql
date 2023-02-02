@@ -254,3 +254,15 @@ join Clients as clt on acc.ClientId = clt.Id
 join SocialStates as ss on ss.Id = clt.SocialStateId
 where ss.Id = @socialStateId
 ------------------------------------------------
+--task7
+------------------------------------------------
+select distinct clt.FullName as 'Client', (select acc.Balance - Sum(Cards.Balance) from Cards
+										   join Accounts on Cards.AccountId = Accounts.Id
+										   join Clients on Clients.Id = Accounts.ClientId
+										   where Accounts.Id = acc.Id) as 'Free money'
+from Accounts as acc
+join Clients as clt on clt.Id = acc.ClientId
+join Cards as crd on acc.ClientId = clt.Id
+group by clt.FullName, acc.Id, acc.Balance
+------------------------------------------------
+
