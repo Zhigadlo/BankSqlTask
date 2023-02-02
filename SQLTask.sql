@@ -266,3 +266,62 @@ join Cards as crd on acc.ClientId = clt.Id
 group by clt.FullName, acc.Id, acc.Balance
 ------------------------------------------------
 
+--task8
+------------------------------------------------
+go
+create procedure TransferMoneyFromAccountToCard
+@accountId int,
+@cardId int,
+@transferAmount money
+as
+if not exists(select 1 from Accounts
+			  where Accounts.Id = @accountId)
+begin
+		  print 'There is no such account'
+end;
+else if not exists(select 1 from Accounts
+		  join Cards on Accounts.Id = Cards.AccountId
+		  where Accounts.Id = @accountId and Cards.Id = @cardId)
+begin
+		  print 'There is no such card on this account'
+end;
+else
+begin 
+
+	begin transaction
+		update Cards 
+		set Balance = Balance + @transferAmount
+		where Id = @cardId
+
+		if(select acc.Balance - Sum(crd.Balance) from Cards as crd 
+												 join Accounts as acc on acc.Id = crd.AccountId
+												 where acc.Id = @accountId and crd.Id = @cardId
+												 group by acc.Balance) < 0
+		begin
+		   print 'Not enough money';
+		   rollback transaction;
+		end;
+	commit transaction
+end;
+
+
+--procedure health check
+declare @accountId int, @cardId int, @transferAmount money
+set @accountId = 1
+set @cardId = 6
+set @transferAmount = 60
+
+select clt.FullName as 'Client', acc.Balance as 'Account money', crd.Balance as 'Card balance'
+from Accounts as acc
+join Clients as clt on clt.Id = acc.ClientId
+join Cards as crd on acc.ClientId = clt.Id
+where acc.Id = @accountId and crd.AccountId = acc.Id
+
+exec TransferMoneyFromAccountToCard @accountId, @cardId, @transferAmount
+
+select clt.FullName as 'Client', acc.Balance as 'Account money', crd.Balance as 'Card balance'
+from Accounts as acc
+join Clients as clt on clt.Id = acc.ClientId
+join Cards as crd on acc.ClientId = clt.Id
+where acc.Id = @accountId and crd.AccountId = acc.Id
+------------------------------------------------
