@@ -212,3 +212,45 @@ select s.Name as 'Social state', (select Count(*) from Cards as crd
 from SocialStates as s
 order by s.Name
 ------------------------------------------------
+
+go
+
+--task6 
+------------------------------------------------
+create procedure AddMoneyToSocialState
+@socialStateId int
+as
+if exists(select 1 from SocialStates
+		  where Id = @socialStateId)
+begin
+	update Accounts 
+	set Balance = Balance + 10 
+	from Accounts as acc
+	join Clients as clt on clt.Id = acc.ClientId
+	join SocialStates as ss on ss.Id = clt.SocialStateId
+	where ss.Id = @socialStateId 
+	
+end
+else
+	print 'There is no such social state'
+
+go
+
+--procedure health check
+declare @socialStateId int 
+set @socialStateId = 5
+
+select clt.FullName as 'Client name', acc.Balance as 'Balance'
+from Accounts as acc 
+join Clients as clt on acc.ClientId = clt.Id
+join SocialStates as ss on ss.Id = clt.SocialStateId
+where ss.Id = @socialStateId
+
+exec AddMoneyToSocialState @socialStateId
+
+select clt.FullName as 'Client name', acc.Balance as 'Balance'
+from Accounts as acc 
+join Clients as clt on acc.ClientId = clt.Id
+join SocialStates as ss on ss.Id = clt.SocialStateId
+where ss.Id = @socialStateId
+------------------------------------------------
