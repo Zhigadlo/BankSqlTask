@@ -182,3 +182,13 @@ join Accounts as acc on acc.Id = crd.AccountId
 join Banks as bnk on bnk.Id = acc.BankId
 join Clients as clt on clt.Id = acc.ClientId
 ------------------------------------------------
+
+--task4
+------------------------------------------------
+select clt.FullName as 'Client', Sum(crd.Balance) as 'Cards balance', acc.Balance as 'Account balance' 
+from Accounts as acc 
+join Clients as clt on clt.Id = acc.ClientId
+join Cards as crd on crd.AccountId = acc.Id
+group by acc.Balance, clt.FullName
+having Sum(crd.Balance) < acc.Balance
+------------------------------------------------
