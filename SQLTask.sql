@@ -202,3 +202,13 @@ join Cards as crd on crd.AccountId = acc.Id
 right join SocialStates as socSt on clt.SocialStateId = socSt.Id
 group by socSt.Name
 ------------------------------------------------
+
+-- task5(sub query realisation)
+------------------------------------------------
+select s.Name as 'Social state', (select Count(*) from Cards as crd 
+								  join Accounts as acc on acc.Id = crd.AccountId 
+								  join Clients as clt on acc.ClientId = clt.Id
+								  where clt.SocialStateId = s.Id) as 'Cards count'
+from SocialStates as s
+order by s.Name
+------------------------------------------------
