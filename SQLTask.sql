@@ -306,22 +306,68 @@ end;
 
 
 --procedure health check
-declare @accountId int, @cardId int, @transferAmount money
-set @accountId = 1
-set @cardId = 6
-set @transferAmount = 60
+declare @accId int, @crdId int, @money money
+set @accId = 1
+set @crdId = 1
+set @money = 60
 
 select clt.FullName as 'Client', acc.Balance as 'Account money', crd.Balance as 'Card balance'
 from Accounts as acc
 join Clients as clt on clt.Id = acc.ClientId
 join Cards as crd on acc.ClientId = clt.Id
-where acc.Id = @accountId and crd.AccountId = acc.Id
+where acc.Id = @accId and crd.AccountId = acc.Id
 
-exec TransferMoneyFromAccountToCard @accountId, @cardId, @transferAmount
+exec TransferMoneyFromAccountToCard @accId, @crdId, @money
 
 select clt.FullName as 'Client', acc.Balance as 'Account money', crd.Balance as 'Card balance'
 from Accounts as acc
 join Clients as clt on clt.Id = acc.ClientId
 join Cards as crd on acc.ClientId = clt.Id
-where acc.Id = @accountId and crd.AccountId = acc.Id
+where acc.Id = @accId and crd.AccountId = acc.Id
+------------------------------------------------
+
+--task9 health care
+------------------------------------------------
+--Accounts check
+
+declare @id int;
+set @id = 5;
+
+select * from Accounts where Id = @id
+--success case
+update Accounts 
+set Balance = Balance - 30
+where Id = @id
+
+select * from Accounts where Id = @id
+
+--error case
+update Accounts 
+set Balance = Balance - 100000
+where Id = @id
+
+--Cards check
+
+set @id = 5;
+
+select acc.Balance as 'Account balance', crd.Id as 'Card id', crd.Balance as 'Card balance'
+from Accounts as acc
+join Cards as crd on crd.AccountId = acc.Id
+where crd.Id = @id
+
+--success case
+update Cards 
+set Balance = Balance + 30
+where Id = @id
+
+select acc.Balance as 'Account balance', crd.Id as 'Card id', crd.Balance as 'Card balance'
+from Accounts as acc
+join Cards as crd on crd.AccountId = acc.Id
+where crd.Id = @id
+
+--error case
+update Cards 
+set Balance = Balance + 100000
+where Id = @id
+
 ------------------------------------------------
